@@ -40,7 +40,7 @@ function create() {
     //  And now add it to the cache, so any sprite can use it
     //  The parameters can be found in the API docs, but the important parts are to leave the URL blank and pass the bmd.canvas as the data value
     //  The 22x22 is the frame size and 16 the quantity of frames
-    game.cache.addSpriteSheet('dynamic', '', bmd.canvas, 22, 22, 16, 0, 0); // 详见源码src/loader/Cache.js
+    game.cache.addSpriteSheet('dynamic', '', bmd.canvas, 22, 22, 16, 0, 0); // 详见源码src/loader/Cache.js 这里相当于造出一个动画SpriteSheet通过之前的bmd图片剪切
 
     //  Let's create a bunch of sprites all using the same new animation data
     for (i = 0; i < 16; i++)
