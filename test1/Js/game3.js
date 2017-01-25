@@ -27,6 +27,15 @@ var car_class = {
 		car.body.allowRotation = true;
 
 		car.tint=0x0000ff;
+		car.display_name=function(mode){
+			if (mode=="create"){
+				car.name_text=game.add.text(car.x,car.y,car.name);
+			}
+			else if (mode="update"){
+				car.name_text.x=car.x;car.name_text.y=car.y;
+			}
+		}
+
 
 		return car;
 	}
@@ -60,7 +69,9 @@ function create() {
     }
 
 	your_car=car_class.createNew();
+	your_car.name="yourCar";
 	your_car.x=100;your_car.y=100;
+	//your_car.display_name("create");//用display_name方法简易演示显示玩家名
     cursors = game.input.keyboard.createCursorKeys();
 
 }
@@ -85,6 +96,7 @@ function update() {
     {
         your_car.body.velocity.copyFrom(game.physics.arcade.velocityFromAngle(your_car.angle, 300));
     }
+	//your_car.display_name("update");
 
 }
 
