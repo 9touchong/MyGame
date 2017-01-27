@@ -8,7 +8,8 @@
     <body>
 	<div id="phaser-game_lis">
 	    <a href="/test">test</a><br/>
-	    <a href="/turn_rotation_test1">转向模型1</a><br/>
+	    <a href="/turn_rotation_test1">转向模型1</a>
+	    <a href="/turn_rotation_test2">转向模型2</a><br/>
 	    <a href="/example_game1">example_game1</a>
 	    <a href="/example_game2">example_game2</a><br/>
 	    <a href="/game1">game1</a>
