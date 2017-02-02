@@ -8,7 +8,6 @@ function preload() {
 
 }
 
-var test_text;
 var your_car;
 var cpu_cars;
 var cursors;
@@ -19,49 +18,21 @@ var car_class = {
 	createNew: function(){
 		var car = game.add.sprite(game.world.randomX, game.world.randomY, 'car');
 		car.name = 'car';
-		car.turn_speed=100;	//转向的速度
-		car.tint=0x0000ff;	//着色
-		car.go_acceleration=80;	//前进的加速度
-
 		car.anchor.set(0.5);
 
 		game.physics.enable(car, Phaser.Physics.ARCADE);
+
 		car.body.collideWorldBounds = true;
-		car.body.bounce.set(0.8);	//弹性
+		car.body.bounce.set(0.8);
 		car.body.allowRotation = true;
-		car.body.maxVelocity.set(100);	//最大速度
-		//car.body.drag.x=100;car.body.drag.y=100;	//车与场地的阻力
 
-
+		car.tint=0x0000ff;
 		car.display_name=function(mode){
 			if (mode=="create"){
 				car.name_text=game.add.text(car.x,car.y,car.name);
 			}
 			else if (mode="update"){
 				car.name_text.x=car.x;car.name_text.y=car.y;
-			}
-		}
-		car.turning = function(mode){
-			if (mode=="S"){
-				car.body.angularVelocity = 0;
-			}
-			else if (mode=="L"){
-				car.body.angularVelocity = -car.turn_speed;
-			}
-			else if (mode=="R"){
-				car.body.angularVelocity = car.turn_speed;
-			}
-		}
-		car.engine = function(mode){
-			if (mode=="Go"){	//前进 踩油门
-				car.body.acceleration=game.physics.arcade.accelerationFromRotation(car.rotation,car.go_acceleration);
-			}
-			else if (mode=="N"){	//neutral空档
-				car.body.acceleration=0;
-			}
-			else if (mode=="B"){	//brake刹车
-			}
-			else if (mode=="R"){	//reverse倒挡
 			}
 		}
 
@@ -82,8 +53,6 @@ var cpu_car_class = {
 //
 
 function create() {
-	test_text1=game.add.text(100,100,"0");
-	test_text2=game.add.text(100,150,"0");
 	game.stage.backgroundColor = "#87CEEB";
 	game.stage.disableVisibilityChange = true;
 
@@ -112,27 +81,23 @@ function update() {
     game.physics.arcade.collide(your_car, cpu_cars);
     game.physics.arcade.collide( cpu_cars );
 
-    your_car.turning("S");
-	your_car.body.acceleration = 0;
+    your_car.body.angularVelocity = 0;
 
     if (cursors.left.isDown)
     {
-        your_car.turning("L");
+        your_car.body.angularVelocity = -200;
     }
     else if (cursors.right.isDown)
     {
-        your_car.turning("R");
+        your_car.body.angularVelocity = 200;
     }
 
     if (cursors.up.isDown)
     {
-		your_car.body.acceleration=game.physics.arcade.accelerationFromRotation(your_car.rotation,your_car.go_acceleration);//加油门前进
+        your_car.body.velocity.copyFrom(game.physics.arcade.velocityFromAngle(your_car.angle, 30));
     }
 	//your_car.display_name("update");
 
-	var test=game.physics.arcade.angleBetween(new Phaser.Point(0,0),your_car.body.velocity);//速度的角度
-	test_text1.text=test;
-	test_text2.text=your_car.angle;
 }
 
 function render() {
