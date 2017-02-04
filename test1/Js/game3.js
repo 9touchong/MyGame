@@ -22,6 +22,7 @@ var car_class = {
 		car.turn_speed=100;	//转向的速度
 		car.tint=0x0000ff;	//着色
 		car.go_acceleration=80;	//前进的加速度
+		car.go_head_angle_dev=0;	//前进时方向与车体的角度偏差，动态计算阻力时用得到,为计算方便这里用度数绝对值
 
 		car.anchor.set(0.5);
 
@@ -64,6 +65,15 @@ var car_class = {
 			else if (mode=="R"){	//reverse倒挡
 			}
 		}
+		car.dynamic_drag = function(){//动态变化的摩擦阻力
+			car.go_head_angle_dev=Math.abs(game.physics.arcade.angleBetween(new Phaser.Point(0,0),car.body.velocity)-car.rotation)/Math.PI*180;
+			if (car.go_head_angle_dev>70 && car.go_head_angle_dev<110){//这里就规定当前进方向与车体在垂直20度左右时阻力较大 其他情况较小
+				car.body.drag.set(100);
+			}else{
+				car.body.drag.set(1);
+			}
+			
+		}
 
 
 		return car;
@@ -82,8 +92,6 @@ var cpu_car_class = {
 //
 
 function create() {
-	test_text1=game.add.text(100,100,"0");
-	test_text2=game.add.text(100,150,"0");
 	game.stage.backgroundColor = "#87CEEB";
 	game.stage.disableVisibilityChange = true;
 
@@ -129,10 +137,8 @@ function update() {
 		your_car.body.acceleration=game.physics.arcade.accelerationFromRotation(your_car.rotation,your_car.go_acceleration);//加油门前进
     }
 	//your_car.display_name("update");
+	your_car.dynamic_drag();
 
-	var test=game.physics.arcade.angleBetween(new Phaser.Point(0,0),your_car.body.velocity);//速度的角度
-	test_text1.text=test;
-	test_text2.text=your_car.angle;
 }
 
 function render() {
