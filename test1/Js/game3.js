@@ -11,7 +11,7 @@ function preload() {
 var test_text;
 var your_car;
 var cpu_cars;
-var cursors;
+var your_keys_up,your_keys_down,your_keys_left,your_keys_right,your_keys_space;
 var usable_Colors = [0x62bd18, 0xffbb00, 0xff5300, 0xd21034, 0xff475c, 0x8f16b2];
 //
 
@@ -22,6 +22,8 @@ var car_class = {
 		car.turn_speed=100;	//转向的速度
 		car.tint=0x0000ff;	//着色
 		car.go_acceleration=80;	//前进的加速度
+		car.reverse_acceleration=-40;	//倒档的加速度，是负数
+		car.normal_drag=10;car.side_drag=100;car.brake_drag=800;//分别代表正常状态、侧滑打横、刹车时的摩擦阻力可以说是车与场地的阻力
 		car.go_head_angle_dev=0;	//前进时方向与车体的角度偏差，动态计算阻力时用得到,为计算方便这里用度数绝对值
 
 		car.anchor.set(0.5);
@@ -54,25 +56,32 @@ var car_class = {
 			}
 		}
 		car.engine = function(mode){
-			if (mode=="Go"){	//前进 踩油门
+			if (mode=="G"){	//前进 Go 踩油门
 				car.body.acceleration=game.physics.arcade.accelerationFromRotation(car.rotation,car.go_acceleration);
 			}
 			else if (mode=="N"){	//neutral空档
 				car.body.acceleration=0;
 			}
 			else if (mode=="B"){	//brake刹车
+				car.body.drag.set(car.brake_drag);
 			}
 			else if (mode=="R"){	//reverse倒挡
+				car.body.acceleration=game.physics.arcade.accelerationFromRotation(car.rotation,car.reverse_acceleration);
 			}
 		}
 		car.dynamic_drag = function(){//动态变化的摩擦阻力
 			car.go_head_angle_dev=Math.abs(game.physics.arcade.angleBetween(new Phaser.Point(0,0),car.body.velocity)-car.rotation)/Math.PI*180;
 			if (car.go_head_angle_dev>70 && car.go_head_angle_dev<110){//这里就规定当前进方向与车体在垂直20度左右时阻力较大 其他情况较小
-				car.body.drag.set(100);
+				car.body.drag.set(car.side_drag);
 			}else{
-				car.body.drag.set(1);
+				car.body.drag.set(car.normal_drag);
 			}
 			
+		}
+		car.update = function(){	//在游戏的update中，会自动调用此处,但注意再像这样的写法对于一个对象，最好是类中的update与游戏主体update函数中的最好二选一吧，这里放点那里放点会出毛病的。
+			car.dynamic_drag();
+			car.turning("S");
+			car.engine("N");
 		}
 
 
@@ -80,12 +89,47 @@ var car_class = {
 	}
 }
 
-var cpu_car_class = {
+var cpu_car_class = {	//电脑角色
 	createNew: function(){
 		var cpu_car=car_class.createNew();
 		cpu_car.name='cpu_car';
 		cpu_car.tint= usable_Colors[game.rnd.between(0, usable_Colors.length - 1)];
 		return cpu_car;
+	}
+}
+
+var your_car_class={	//玩家角色
+	createNew: function(){
+		var your_car = car_class.createNew();
+		your_car.name="yourCar";
+		your_car.keys_up=game.input.keyboard.addKey(Phaser.Keyboard.UP);
+		your_car.keys_down=game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+		your_car.keys_left=game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+		your_car.keys_right=game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+		your_car.keys_space=game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+		var parent_update=your_car.update;
+		your_car.update = function(){
+			parent_update();
+    if (your_car.keys_left.isDown)
+    {
+		your_car.body.angularVelocity=-100;
+    }else if (your_car.keys_right.isDown)
+    {
+        your_car.turning("R");
+    }
+
+    if (your_car.keys_up.isDown)
+    {
+        your_car.engine("G");	//前进 加油门前进
+    }else if (your_car.keys_down.isDown){
+        your_car.engine("R");	//倒车
+	}
+
+	if(your_car.keys_space.isDown){
+		your_car.engine("B");	//刹车制动
+	} 
+		};
+		return your_car;
 	}
 }
 
@@ -107,12 +151,10 @@ function create() {
 		cpu_cars.add(s);
     }
 
-	your_car=car_class.createNew();
+	your_car=your_car_class.createNew();
 	your_car.name="yourCar";
 	your_car.x=100;your_car.y=100;
 	//your_car.display_name("create");//用display_name方法简易演示显示玩家名
-    cursors = game.input.keyboard.createCursorKeys();
-
 }
 
 function update() {
@@ -120,24 +162,7 @@ function update() {
     game.physics.arcade.collide(your_car, cpu_cars);
     game.physics.arcade.collide( cpu_cars );
 
-    your_car.turning("S");
-	your_car.body.acceleration = 0;
-
-    if (cursors.left.isDown)
-    {
-        your_car.turning("L");
-    }
-    else if (cursors.right.isDown)
-    {
-        your_car.turning("R");
-    }
-
-    if (cursors.up.isDown)
-    {
-		your_car.body.acceleration=game.physics.arcade.accelerationFromRotation(your_car.rotation,your_car.go_acceleration);//加油门前进
-    }
 	//your_car.display_name("update");
-	your_car.dynamic_drag();
 
 }
 
