@@ -8,10 +8,8 @@ function preload() {
 
 }
 
-var test_text;
 var your_car;
 var cpu_cars;
-var your_keys_up,your_keys_down,your_keys_left,your_keys_right,your_keys_space;
 var usable_Colors = [0x62bd18, 0xffbb00, 0xff5300, 0xd21034, 0xff475c, 0x8f16b2];
 //
 
@@ -82,6 +80,7 @@ var car_class = {
 			car.dynamic_drag();
 			car.turning("S");
 			car.engine("N");
+			car.display_name("update");
 		}
 
 
@@ -94,6 +93,27 @@ var cpu_car_class = {	//电脑角色
 		var cpu_car=car_class.createNew();
 		cpu_car.name='cpu_car';
 		cpu_car.tint= usable_Colors[game.rnd.between(0, usable_Colors.length - 1)];
+		cpu_car.turnTo = function(target){	//转向某目标 传入参数target是一个游戏中的对象
+			cpu_car.me_target_rot=game.physics.arcade.angleToXY(cpu_car,target.x,target.y);
+			cpu_car.start_rot=cpu_car.rotation;
+			cpu_car.arithmetic_d_s_t=cpu_car.me_target_rot - cpu_car.rotation;
+			cpu_car.d_s_t=Math.min(Math.abs(cpu_car.arithmetic_d_s_t),2*Math.PI-Math.abs(cpu_car.arithmetic_d_s_t));
+			if (cpu_car.arithmetic_d_s_t==0){
+				cpu_car.turning("S");
+			}
+			else {
+				if (cpu_car.arithmetic_d_s_t<-Math.PI || (Math.PI>cpu_car.arithmetic_d_s_t && cpu_car.arithmetic_d_s_t>0)){
+				cpu_car.turning("R");
+				}else{
+				cpu_car.turning("L");
+				}
+				cpu_car.now_arithmetic_d_s_t=cpu_car.rotation-cpu_car.start_rot;
+				cpu_car.now_d_s_t=Math.min(Math.abs(cpu_car.now_arithmetic_d_s_t),2*Math.PI-Math.abs(cpu_car.now_arithmetic_d_s_t));
+				if (cpu_car.now_d_s_t>=cpu_car.d_s_t){
+					cpu_car.turning("S");
+				}
+			}
+		}
 		return cpu_car;
 	}
 }
@@ -102,32 +122,31 @@ var your_car_class={	//玩家角色
 	createNew: function(){
 		var your_car = car_class.createNew();
 		your_car.name="yourCar";
+		//控制键位声明，此处以后可以改进使改变键位更容易
 		your_car.keys_up=game.input.keyboard.addKey(Phaser.Keyboard.UP);
 		your_car.keys_down=game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
 		your_car.keys_left=game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
 		your_car.keys_right=game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
 		your_car.keys_space=game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-		var parent_update=your_car.update;
+		var parent_update=your_car.update;	//此处为了继承car_class中的update
 		your_car.update = function(){
 			parent_update();
-    if (your_car.keys_left.isDown)
-    {
-		your_car.body.angularVelocity=-100;
-    }else if (your_car.keys_right.isDown)
-    {
-        your_car.turning("R");
-    }
+			//键位功能
+			if (your_car.keys_left.isDown){
+				your_car.body.angularVelocity=-100;
+			}else if (your_car.keys_right.isDown){
+				your_car.turning("R");
+			}
 
-    if (your_car.keys_up.isDown)
-    {
-        your_car.engine("G");	//前进 加油门前进
-    }else if (your_car.keys_down.isDown){
-        your_car.engine("R");	//倒车
-	}
+			if (your_car.keys_up.isDown){
+				your_car.engine("G");	//前进 加油门前进
+			}else if (your_car.keys_down.isDown){
+				your_car.engine("R");	//倒车
+			}
 
-	if(your_car.keys_space.isDown){
-		your_car.engine("B");	//刹车制动
-	} 
+			if(your_car.keys_space.isDown){
+				your_car.engine("B");	//刹车制动
+			} 
 		};
 		return your_car;
 	}
@@ -141,6 +160,17 @@ function create() {
 
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
+	//游戏暂停Esc
+	game.input.keyboard.addKey(Phaser.Keyboard.ESC).onDown.add(function(){
+		game.physics.arcade.isPaused = (game.physics.arcade.isPaused) ? false : true;
+	}, this);
+
+	your_car=your_car_class.createNew();
+	your_car.name="yourCar";
+	your_car.display_name("create");
+	your_car.x=100;your_car.y=100;
+	//your_car.display_name("create");//用display_name方法简易演示显示玩家名
+
     cpu_cars = game.add.group();
     cpu_cars.enableBody = true;
 
@@ -150,11 +180,15 @@ function create() {
         s.name = 'cpu_car' + i;
 		cpu_cars.add(s);
     }
-
-	your_car=your_car_class.createNew();
-	your_car.name="yourCar";
-	your_car.x=100;your_car.y=100;
-	//your_car.display_name("create");//用display_name方法简易演示显示玩家名
+	cpu_cars.forEach(function(item){
+		item.display_name("create");
+		item.tem_update=item.update;
+		item.update = function(){
+			item.tem_update();
+			item.display_name("update");
+			item.turnTo(your_car);
+		};
+	})
 }
 
 function update() {

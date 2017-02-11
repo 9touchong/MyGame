@@ -10,6 +10,10 @@ var Animal = {
 　　　　createNew: function(){
 　　　　　　var animal = {};
 　　　　　　animal.sleep = function(){ alert("睡懒觉"); };
+			animal.say_slogan = function(){
+				animal.slogan="animal slogan";
+				alert (animal.slogan);
+			};
 　　　　　　return animal;
 　　　　}
 　　};
@@ -29,7 +33,9 @@ var Cat = {
 　　};
 
 var cat1 = Cat.createNew();
-cat1.sleep(); // 睡懒觉
+//cat1.sleep(); // 睡懒觉
+var ani = Animal.createNew();
+ani.say_slogan();
 		</script>
 	</body>
 </html>

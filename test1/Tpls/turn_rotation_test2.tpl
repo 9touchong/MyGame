@@ -28,6 +28,7 @@ function create() {
     game.stage.backgroundColor = '#0072bc';
 
     sprite = game.add.sprite(400, 300, 'arrow');
+	target_sp=game.add.sprite(100, 300, 'arrow');
     game.physics.enable(sprite, Phaser.Physics.ARCADE);
     sprite.anchor.setTo(0.5, 0.5);
     testtext=game.add.text(100,100,'target_point_rot');
@@ -35,12 +36,15 @@ function create() {
     testtext3=game.add.text(100,200,'LRS');
     testtext4=game.add.text(100,250,'d_s_t');
     testtext5=game.add.text(100,300,'now_d_s_t');
+	// 方向键
+    cursors = game.input.keyboard.createCursorKeys();
 
 }
 
 function update() {
-     if (game.input.activePointer.isDown){
-		target_point_rot=game.physics.arcade.angleToPointer(sprite);
+     //if (game.input.activePointer.isDown){
+		//target_point_rot=game.physics.arcade.angleToPointer(sprite);
+		target_point_rot=game.physics.arcade.angleToXY(sprite,target_sp.x,target_sp.y);
 		start_rot=sprite.rotation;
 		arithmetic_d_s_t=target_point_rot - sprite.rotation;
 		d_s_t=Math.min(Math.abs(arithmetic_d_s_t),2*Math.PI-Math.abs(arithmetic_d_s_t));
@@ -51,7 +55,7 @@ function update() {
 		}else{
 			should_turn="L";
 		}
-     }
+     //}
 	 if (should_turn=="S"){
 		 sprite.body.angularVelocity =  0;
 	 }
@@ -72,6 +76,17 @@ function update() {
 	testtext3.text=should_turn;
 	testtext4.text="d_s_t"+d_s_t;
 	testtext5.text="now_d_s_t"+now_d_s_t;
+
+	if (cursors.left.isDown) {
+        target_sp.x -= 2;
+    } else if (cursors.right.isDown) {
+        target_sp.x += 2;
+    }
+    if (cursors.up.isDown) {
+        target_sp.y -= 2;
+    } else if (cursors.down.isDown) {
+        target_sp.y += 2;
+    }
 }
 	 /*target减去源点的rot
 	 //小于-3.14往右 小于0且大于目标rot止
