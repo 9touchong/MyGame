@@ -10,6 +10,7 @@ function preload() {
 
 var your_car;
 var cpu_cars;
+var role_list;	//游戏中所有角色的列表
 var usable_Colors = [0x62bd18, 0xffbb00, 0xff5300, 0xd21034, 0xff475c, 0x8f16b2];
 //
 
@@ -93,8 +94,19 @@ var cpu_car_class = {	//电脑角色
 		var cpu_car=car_class.createNew();
 		cpu_car.name='cpu_car';
 		cpu_car.tint= usable_Colors[game.rnd.between(0, usable_Colors.length - 1)];
-		cpu_car.turnTo = function(target){	//转向某目标 传入参数target是一个游戏中的对象
-			cpu_car.me_target_rot=game.physics.arcade.angleToXY(cpu_car,target.x,target.y);
+		cpu_car.turnTo = function(target){	//转向某目标 传入参数target是一个游戏中的对象，可以传入第二个参数，reverse，布尔值，为true时反转。
+			//cpu_car.me_target_rot=game.physics.arcade.angleToXY(cpu_car,target.x,target.y);
+			var reverse = arguments[1] ? arguments[1] : false;//当为true时反转，代表背对次目标
+			if (reverse){
+				var tem=game.physics.arcade.angleToXY(cpu_car,target.x,target.y);
+				if (tem>0){
+					cpu_car.me_target_rot = tem-Math.PI;
+				}else{
+					cpu_car.me_target_rot = tem+Math.PI;
+				}
+			}else{
+				cpu_car.me_target_rot=game.physics.arcade.angleToXY(cpu_car,target.x,target.y);
+			}
 			cpu_car.start_rot=cpu_car.rotation;
 			cpu_car.arithmetic_d_s_t=cpu_car.me_target_rot - cpu_car.rotation;
 			cpu_car.d_s_t=Math.min(Math.abs(cpu_car.arithmetic_d_s_t),2*Math.PI-Math.abs(cpu_car.arithmetic_d_s_t));
@@ -155,6 +167,7 @@ var your_car_class={	//玩家角色
 //
 
 function create() {
+	role_list = new Phaser.ArraySet([]);
 	game.stage.backgroundColor = "#87CEEB";
 	game.stage.disableVisibilityChange = true;
 
@@ -167,9 +180,9 @@ function create() {
 
 	your_car=your_car_class.createNew();
 	your_car.name="yourCar";
-	your_car.display_name("create");
+	your_car.display_name("create");//用display_name方法简易演示显示玩家名
 	your_car.x=100;your_car.y=100;
-	//your_car.display_name("create");//用display_name方法简易演示显示玩家名
+	role_list.add(your_car);
 
     cpu_cars = game.add.group();
     cpu_cars.enableBody = true;
@@ -179,14 +192,28 @@ function create() {
         var s = cpu_car_class.createNew();
         s.name = 'cpu_car' + i;
 		cpu_cars.add(s);
+		role_list.add(s);
     }
 	cpu_cars.forEach(function(item){
-		item.display_name("create");
+		item.display_name("create");	//角色名
+		item.behavior = function(mode){	//规定的AI行为的方法
+			if (mode=="create"){
+				item.chose_fillowTarget = function(){
+					item.followTarget = Phaser.ArrayUtils.getRandomItem(role_list.list);
+					game.time.events.add(Phaser.Timer.SECOND * game.rnd.integerInRange(4,11), item.chose_fillowTarget, this);
+				};
+				item.chose_fillowTarget();	//随机选择对象追逐,并在一会儿后重复
+			}else if (mode=="update"){
+				item.turnTo(item.followTarget);
+				item.engine("G");
+			}
+		}
+		item.behavior("create");
 		item.tem_update=item.update;
 		item.update = function(){
 			item.tem_update();
 			item.display_name("update");
-			item.turnTo(your_car);
+			item.behavior("update");
 		};
 	})
 }
