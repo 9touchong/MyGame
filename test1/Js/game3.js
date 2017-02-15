@@ -24,6 +24,7 @@ var car_class = {
 		car.reverse_acceleration=-40;	//倒档的加速度，是负数
 		car.normal_drag=10;car.side_drag=100;car.brake_drag=800;//分别代表正常状态、侧滑打横、刹车时的摩擦阻力可以说是车与场地的阻力
 		car.go_head_angle_dev=0;	//前进时方向与车体的角度偏差，动态计算阻力时用得到,为计算方便这里用度数绝对值
+		car.HP=5;
 
 		car.anchor.set(0.5);
 
@@ -37,7 +38,7 @@ var car_class = {
 
 		car.display_name=function(mode){
 			if (mode=="create"){
-				car.name_text=game.add.text(car.x,car.y,car.name);
+				car.name_text=game.add.text(-200,-200,car.name);
 			}
 			else if (mode="update"){
 				car.name_text.x=car.x;car.name_text.y=car.y;
@@ -82,6 +83,12 @@ var car_class = {
 			car.turning("S");
 			car.engine("N");
 			car.display_name("update");
+		}
+		car.be_crashed = function(){	//被撞毁
+			if ("name_text" in car){	//已显示了角色名
+				car.name_text.kill();	//经测试用destroy报错几率高，因为其将对象彻底销毁而kill仍留在内存中
+			}
+			car.kill();
 		}
 
 
@@ -220,8 +227,8 @@ function create() {
 
 function update() {
 
-    game.physics.arcade.collide(your_car, cpu_cars);
-    game.physics.arcade.collide( cpu_cars );
+    game.physics.arcade.collide(your_car, cpu_cars, car_collided);
+    game.physics.arcade.collide(cpu_cars,cpu_cars, car_collided);
 
 	//your_car.display_name("update");
 
@@ -229,5 +236,12 @@ function update() {
 
 function render() {
 	game.debug.spriteInfo(your_car, 32, 32);
+}
+
+function car_collided(car1,car2){	//car相撞的处理函数
+	car1.HP -= 1;
+	car2.HP -= 1;
+	if (car1.HP <= 0){car1.be_crashed();};
+	if (car2.HP <= 0){car2.be_crashed();};
 }
 
