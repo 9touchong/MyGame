@@ -34,8 +34,7 @@ var Cat = {
 
 var cat1 = Cat.createNew();
 //cat1.sleep(); // 睡懒觉
-var ani = Animal.createNew();
-ani.say_slogan();
+alert ("name" in cat1);
 		</script>
 	</body>
 </html>
