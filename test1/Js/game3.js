@@ -190,6 +190,7 @@ game.States.preload = function(){
 		game.load.image('baddie', 'assets/sprites/space-baddie.png');
 		game.load.image('start_btn', 'assets/startgameBtn.png');
 		game.load.image('gameover', 'assets/gameover.png');
+		game.load.audio('hit_sound', 'assets/pipe-hit.wav');
 	}
 	this.create = function(){
 		game.state.start("menu");
@@ -208,7 +209,9 @@ game.States.play = function(){
 	var your_car;
 	var cpu_cars;
 	var role_list = new Phaser.ArraySet([]);
+	var PlaySounds = {};	//play场景中的音效合集
 	this.create = function(){
+		PlaySounds.soundHit = game.add.sound('hit_sound');
 		game.stage.backgroundColor = "#87CEEB";
 		game.stage.disableVisibilityChange = true;
 	
@@ -270,6 +273,7 @@ game.States.play = function(){
 	}
 	//其他自定功能函数
 	this.car_collided = function(car1,car2){	//car相撞的处理函数
+		PlaySounds.soundHit.play();
 		car1.HP -= 1;
 		car2.HP -= 1;
 		if (car1.HP <= 0){car1.be_crashed();end_info.death_order.add(car1.name);};
@@ -295,7 +299,7 @@ game.States.play = function(){
 }
 game.States.end = function(){
 	this.create = function(){
-		game.add.text(200,200,end_info.death_order.first,{ font: "65px Arial", fill: "#ff0044", align: "center" });
+		game.add.text(200,200,end_info.death_order.first,{ font: "65px Arial", fill: "#ff0044", align: "center" });	//此场景可显示此局游戏统计信息，这里只象征性的显示了第一个死亡的。
 	}
 }
 
