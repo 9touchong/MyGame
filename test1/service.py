@@ -1,5 +1,8 @@
-﻿import bottle
-from bottle import Bottle,route,run,template,redirect,request,response,static_file,error
+﻿import Conf
+import bottle
+from bottle import Bottle,route,run,template,get,redirect,request,response,static_file,error
+from bottle.ext.websocket import GeventWebSocketServer
+from bottle.ext.websocket import websocket
 #
 Tpl_path='./Tpls'
 if not Tpl_path in bottle.TEMPLATE_PATH:
@@ -7,6 +10,7 @@ if not Tpl_path in bottle.TEMPLATE_PATH:
 #
 #######
 w_showWebApp=Bottle()
+users = set()   #用于WS实例
 #bottle.debug(True)
 #根目录路由
 @w_showWebApp.route('/:a_rootf')
@@ -43,4 +47,18 @@ def Index(agame):
     except:
         return template('normal_one_game',game_name=agame)
 #
-run(w_showWebApp,host='localhost',port=2356,reloader=True)
+@get('/websocket', apply=[websocket])
+def chat(ws):
+    users.add(ws)
+    while True:
+        msg = ws.receive()
+        if msg is not None:
+            for u in users:
+                u.send(msg)
+            else:
+                break
+    users.remove(ws)
+#
+#localhost
+#192.168.1.106
+run(w_showWebApp,host=Conf.localhost,port=Conf.localport,reloader=True,server=GeventWebSocketServer)

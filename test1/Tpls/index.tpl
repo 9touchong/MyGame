@@ -14,7 +14,8 @@
 	    <a href="/example_game2">example_game2</a><br/>
 	    <a href="/game1">game1</a>
 	    <a href="/game2">game2</a>
-	    <a href="/game3">game3</a>
+	    <a href="/game3">game3</a><br/>
+        <a href="/WSexample1">WS例子-chat</a>
 	</div>
     </body>
 </html>
