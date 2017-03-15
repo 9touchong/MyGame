@@ -47,18 +47,19 @@ def Index(agame):
     except:
         return template('normal_one_game',game_name=agame)
 #
-@get('/websocket', apply=[websocket])
+#@w_showWebApp.get('/websocket', apply=[websocket])
+@w_showWebApp.route('/websocket', apply=[websocket])
 def chat(ws):
     users.add(ws)
-    while True:
+    while True: #现在发现的问题就是这里总是连着触发两次，第二次接受到内容为空
         msg = ws.receive()
         if msg is not None:
             for u in users:
                 u.send(msg)
-            else:
-                break
+                print ("haha",u,msg)
+        else:
+            break
+        print ('11111111')
     users.remove(ws)
 #
-#localhost
-#192.168.1.106
 run(w_showWebApp,host=Conf.localhost,port=Conf.localport,reloader=True,server=GeventWebSocketServer)

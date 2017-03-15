@@ -1,8 +1,0 @@
-# PhaserGame
-目前阶段就是记录学习phaser的笔记和问题记录
-在官方example中animation下creature dragon multiple.js和creature-dragon.js等在本地无法运行，在 game.add.creature这里不运行了.      后来发现是用的phaserjs文件版本比例子新，新版本中同样效果如何实现还要探究。 最终确定 是文件版本不同但不是新旧的问题，例子用的是phaser.2.4.7.complete.min.js，试验的时候用的是phaser_2_6_2.min.js，关键不是2××这个版本号，而是complete，每一版本的complete版都是比单纯版整合了更多的东西，这里还用2.6.2但加上phaser-creature.2.6.2.min.js和creature.2.6.2.min.js文件就可以了。creature这东西是一个做2d骨骼动画的，估计就是例子中的json文件用的就是这个软件生成的，但收费。Spine、DragonBones也做这件事情 其中DragonBones还免费，是白鹭的，但与phaser一定无法对接。
-notedScripts文件夹是学习实例时候做了笔记的脚本备份
-一些示例脚本要结合插件 未深究
-phaser的本体支持box2d但是并没有嵌入box2d，还要自行添加box2d的本体。其实phaser里的box2d是一个商业插件 不要用它。非要用box2d也可以找到其他的。Ninja Physics、Particle Storm等也是同样的情况。
-发现 所有示例中带有 "http://..." 的外部文件都无法成功load，不知道是不是本地apache服务器部署的问题还是什么其他的，但看这些示例在其网站上也运行不正常，应该也可能是其写法就不正确或phaser本身有此bug，而有时这样的也可以正常运行 难道只是网络问题。
-对于切换浏览器标签页，游戏就暂停运行的现象，目前怀疑是与HTML5 Page Visibility API有关。还需研究。

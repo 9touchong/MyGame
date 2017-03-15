@@ -8,7 +8,7 @@
         li { list-style: none; }
     </style>
 
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+    <script src="/Js/jquery.1.6.4.min.js"></script>
     <script>
         $(document).ready(function() {
             if (!window.WebSocket) {
@@ -18,16 +18,25 @@
                     $('#messages').append("<li>Your browser doesn't support WebSockets.</li>");
                 }
             }
-            //ws = new WebSocket('ws://192.168.1.106:2356/websocket');
+            //ws = new WebSocket('ws://192.168.1.106:2353/websocket');
             ws = new WebSocket('ws://{{Conf.localhost}}:{{Conf.localport}}/websocket');
             ws.onopen = function(evt) {
                 $('#messages').append('<li>Connected to chat.</li>');
             }
             ws.onmessage = function(evt) {
+				alert ('received sth');
                 $('#messages').append('<li>' + evt.data + '</li>');
             }
-            $('#send-message').submit(function() {
+			ws.onclose = function(evt){
+				alert ('webscoket has been closed!');
+			}
+			ws.onerror = function(evt){
+				alert ('some webscoket errors happened');
+				console.log('Error occured: ' + evt.data);
+			}
+            $('#send-message').click(function() {
                 ws.send($('#name').val() + ": " + $('#message').val());
+				$('#messages').append('<li>I have sended sth.</li>');
                 $('#message').val('').focus();
                 return false;
             });
@@ -36,11 +45,12 @@
 </head>
 <body>
     <h2>WebSocket Chat Example</h2>
-    <form id="send-message">
+    <form>
         <input id="name" type="text" value="name">
         <input id="message" type="text" value="message" />
-        <input type="submit" value="Send" />
+        <input id="send-message" type="button" value="Send" />
     </form>
-    <div id="messages"></div>
+    <div id="messages">
+	</div>
 </body>
 </html>

@@ -3,38 +3,21 @@
     <head>
 		<title>9touchong</title>
 		<script type="text/javascript" src="/Js/phaser.2.6.2.min.js"></script>
+		<script src="/Js/jquery.1.6.4.min.js"></script>
+		<script>
+			$(document).ready(function() {
+				$('#go').click(function() {
+					$('#result').append('<li>I have sended sth.</li>');
+				})
+			})
+		</script>
 	</head>
 	<body>
-		<script>
-var Animal = {
-　　　　createNew: function(){
-　　　　　　var animal = {};
-　　　　　　animal.sleep = function(){ alert("睡懒觉"); };
-			animal.say_slogan = function(){
-				animal.slogan="animal slogan";
-				alert (animal.slogan);
-			};
-　　　　　　return animal;
-　　　　}
-　　};
-
-var Cat = {
-　　　　createNew: function(){
-			var cat = Animal.createNew();
-　　　　　　cat.name = "大毛";
-　　　　　　cat.makeSound = function(){ alert("喵喵喵"); };
-			var parent_sleep=cat.sleep;
-			cat.sleep = function(){
-				parent_sleep();
-				alert ("hau");
-			}
-　　　　　　return cat;
-　　　　}
-　　};
-
-var cat1 = Cat.createNew();
-//cat1.sleep(); // 睡懒觉
-alert ("name" in cat1);
-		</script>
+		<form id="zwd">
+			First name: <input type="text" name="firstname" value="first"><br>
+			Last name: <input type="text" name="lastname" value="last"><br>
+			<input type="button" value="Submit" id="go">
+		</form>
+		<div id="result"></div>
 	</body>
 </html>
