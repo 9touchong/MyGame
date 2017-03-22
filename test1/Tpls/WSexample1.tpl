@@ -1,4 +1,5 @@
 %import Conf
+%#来自https://github.com/zeekay/bottle-websocket/edit/master/examples/chat/index.tpl的例子,进行了实验性的极小改编。本例子就是基本的传消息到ws服务器在接到服务器的原句的返回并显示。
 <!doctype html>
 <head>
     <meta charset="utf-8" />
@@ -19,7 +20,7 @@
                 }
             }
             //ws = new WebSocket('ws://192.168.1.106:2353/websocket');
-            ws = new WebSocket('ws://{{Conf.localhost}}:{{Conf.localport}}/websocket');
+            ws = new WebSocket('ws://{{Conf.localhost}}:{{Conf.localport}}/forWSexample1');
             ws.onopen = function(evt) {
                 $('#messages').append('<li>Connected to chat.</li>');
             }
@@ -31,12 +32,13 @@
 				alert ('webscoket has been closed!');
 			}
 			ws.onerror = function(evt){
-				alert ('some webscoket errors happened');
+				//alert ('some webscoket errors happened');
 				console.log('Error occured: ' + evt.data);
 			}
-            $('#send-message').click(function() {
+%#            $('#send-message').click(function() {
+			$('#send').submit(function() {		
                 ws.send($('#name').val() + ": " + $('#message').val());
-				$('#messages').append('<li>I have sended sth.</li>');
+				$('#messages').append('<li>I have sended '+$('#name').val() + ": " + $('#message').val()+'.</li>');
                 $('#message').val('').focus();
                 return false;
             });
@@ -45,10 +47,12 @@
 </head>
 <body>
     <h2>WebSocket Chat Example</h2>
-    <form>
+%#    <form>
+	<form id="send" action='.'>
         <input id="name" type="text" value="name">
         <input id="message" type="text" value="message" />
-        <input id="send-message" type="button" value="Send" />
+%#        <input id="send-message" type="button" value="Send" />
+		<input type="submit" value="Send" />		
     </form>
     <div id="messages">
 	</div>
