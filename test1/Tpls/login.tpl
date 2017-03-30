@@ -1,0 +1,13 @@
+%#hjuh
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+	</head>
+	<body>
+		<form class="form-signin"  action="/dologin" method="post">
+			<input type="text" id="username" name="username"/>
+			<input type="password" id="password" name="password"/>
+			<button id="Go_login" type="submit">登录</button>
+		</form>
+	</body>
+</html>

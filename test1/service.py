@@ -3,6 +3,8 @@ import bottle
 from bottle import Bottle,route,run,template,get,redirect,request,response,static_file,error
 from bottle.ext.websocket import GeventWebSocketServer
 from bottle.ext.websocket import websocket
+import jwt
+import time
 #
 Tpl_path='./Tpls'
 if not Tpl_path in bottle.TEMPLATE_PATH:
@@ -12,6 +14,22 @@ if not Tpl_path in bottle.TEMPLATE_PATH:
 w_showWebApp=Bottle()
 for_WSexample1_users = set()   #用于WS实例
 #bottle.debug(True)
+#处理token验证函数
+def check_token():  #检查token正确合法与否
+    try:
+        recrived_token=request.get_cookie('access_token')
+        if recrived_token:
+            info=jwt.decode(recrived_token,Conf.secret_key,Conf.encryption_algorithm)
+            if info['exp']<time.time():    #过期
+                redirect('/login')
+            #返回有用信息，到比如模板用id等处理user显示,至于exp等就不传了
+            return {'id':info['id'],'name':info['name']}
+        else:
+            redirect('/login')
+    except:
+        redirect('/login')
+        return False
+#
 #根目录路由
 @w_showWebApp.route('/:a_rootf')
 def static_one_rootf(a_rootf):
@@ -32,19 +50,44 @@ def static_one_image(a_folder,a_asset):
 def deal_error404(error):
     return template('Error404')
 #
+@w_showWebApp.route('/dologin',method='POST')
+def do_login():
+    username = request.forms.get('username')
+    password = request.forms.get('password')
+    print ('get',username,password)
+    #判断用户名密码是否正确
+    if username in Conf.Users and Conf.Users[username]['pw']==password:  #这里的username在数据库(假设有)中对应的是id
+        print (username,'允许登陆')
+        #产生token
+        t_payload={ #JWT标准中的载荷，实际有用信息的传输
+            'id':username,  #注意传进来的username是user id
+            'name':Conf.Users[username]['name'],    #用户名称，这才是真正意义的username
+            'iat':int(time.time()),  #签发时间
+            'exp':int(time.time())+Conf.access_token_exp    #过期时间
+        }
+        t_acess_token=jwt.encode(t_payload,Conf.secret_key,Conf.encryption_algorithm).decode('utf-8')
+        response.set_cookie('access_token',t_acess_token,max_age=Conf.cookie_exp,path='/')  #将token存入cookie
+        print (t_acess_token)
+        #完成登陆跳转首页
+        redirect('/index')
+    else:
+        redirect('/login')
+#
 @w_showWebApp.route('/')
 def redirect_to_index():
     redirect('/index')
 #
 @w_showWebApp.route('/index')
 def Index():
-    return template('index')
+    UserInfo=check_token();
+    return template('index',UserInfo=UserInfo)
 #
 @w_showWebApp.route('/:agame')
-def Index(agame):
+def agame(agame):
     try:
         return template(agame)
-    except:
+    except Exception as e:
+        print ('route',agame,'cause error : ',e)
         return template('normal_one_game',game_name=agame)
 #
 #@w_showWebApp.get('/websocket', apply=[websocket])
@@ -63,3 +106,4 @@ def chat(ws):   #此路由仅用于WS实例1，注释记录暂保留问题已解
     for_WSexample1_users.remove(ws)
 #
 run(w_showWebApp,host=Conf.localhost,port=Conf.localport,reloader=True,server=GeventWebSocketServer)
+#run(w_showWebApp,host=Conf.localhost,port=Conf.localport)
