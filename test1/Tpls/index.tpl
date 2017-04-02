@@ -25,6 +25,7 @@
 	    <a href="/game2">game2</a>
 	    <a href="/game3">game3</a><br/>
         <a href="/WSexample1">WS例子-chat</a>
+        <a href="/WSchatroom">WS-群聊室</a><br/>
 	</div>
     </body>
 </html>

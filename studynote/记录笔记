@@ -13,3 +13,4 @@ game3就已经是一个麻雀虽小五脏俱全的单机碰碰车游戏了；之
 websocket的linux下python使用的环境搭建记录：准备用的是bottle-websocket，其实即使用其他工具恐怕也逃不过相似的环境配置。要gevent，那就要先安greenlet和libevent，其中libevent的安装颇费周折。都有一些依赖库要安装。
 bottle-websocket在win下安装倒方便，但插件pip3形式安好后对py3支持不好，应该是由2改过来的，自己2to3一下并修改一些地方，还是无法运行出一个简单示例，原因最可能就是2到3的改装有不足的地方，实在不行就放弃了。
 最后发现问题在geventwebsocket上，不支持py3，已有人解决了这个问题，用pip安装了别人的一个fork，karellen-geventws就可以了。简单测试了一个例子bottle-websocket能运行了。
+edge浏览器测试连登陆都不好使，问题不好说，若在浏览器，浏览器上网能上之前测试项目也正常；若问题在项目代码，360和谷歌浏览器就没有问题。`

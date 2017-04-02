@@ -5,6 +5,7 @@ from bottle.ext.websocket import GeventWebSocketServer
 from bottle.ext.websocket import websocket
 import jwt
 import time
+import json
 #
 Tpl_path='./Tpls'
 if not Tpl_path in bottle.TEMPLATE_PATH:
@@ -12,7 +13,8 @@ if not Tpl_path in bottle.TEMPLATE_PATH:
 #
 #######
 w_showWebApp=Bottle()
-for_WSexample1_users = set()   #用于WS实例
+for_WSexample1_users = set()    #用于WS实例
+for_WSchatroom_users = set()    #用于WS聊天室项目 存储成员的ws
 #bottle.debug(True)
 #处理token验证函数
 def check_token():  #检查token正确合法与否
@@ -66,7 +68,7 @@ def do_login():
             'exp':int(time.time())+Conf.access_token_exp    #过期时间
         }
         t_acess_token=jwt.encode(t_payload,Conf.secret_key,Conf.encryption_algorithm).decode('utf-8')
-        response.set_cookie('access_token',t_acess_token,max_age=Conf.cookie_exp,path='/')  #将token存入cookie
+        response.set_cookie('access_token',t_acess_token,max_age=Conf.cookie_exp,path='/')  #将token存入cookie,以后有需要也可同用web storage
         print (t_acess_token)
         #完成登陆跳转首页
         redirect('/index')
@@ -82,13 +84,18 @@ def Index():
     UserInfo=check_token();
     return template('index',UserInfo=UserInfo)
 #
+@w_showWebApp.route('/login')
+def login():
+    return template('login')
+#
 @w_showWebApp.route('/:agame')
 def agame(agame):
+    UserInfo=check_token();
     try:
-        return template(agame)
+        return template(agame,UserInfo=UserInfo)
     except Exception as e:
         print ('route',agame,'cause error : ',e)
-        return template('normal_one_game',game_name=agame)
+        return template('normal_one_game',game_name=agame,UserInfo=UserInfo)
 #
 #@w_showWebApp.get('/websocket', apply=[websocket])
 @w_showWebApp.route('/forWSexample1', apply=[websocket])
@@ -104,6 +111,23 @@ def chat(ws):   #此路由仅用于WS实例1，注释记录暂保留问题已解
             print ('接受到的msg是None')
             break
     for_WSexample1_users.remove(ws)
+#
+@w_showWebApp.route('/forWSchatroom', apply=[websocket])
+def chatroom(ws):   #用于聊天室项目通信
+    while True:
+        msg = ws.receive()
+        if not ws in for_WSchatroom_users:  #判断ws连接者身份是否合法
+            t_userinfo=jwt.decode(msg,Conf.secret_key,Conf.encryption_algorithm)
+            if t_userinfo and t_userinfo['id'] in ['0001','0002']:  #简化验证
+                for_WSchatroom_users.add(ws)
+            else:
+                return 0    #其实这里也可以主动关闭连接
+        else:   #下面就是合法成员正常传送消息的情况了
+            d_msg=json.loads(msg)
+            s_msg=json.dumps(d_msg) #这里象征性的处理一下，结果和接收到的一样
+            print ('msg类型',type(s_msg),'msg:',s_msg)
+            for u in for_WSchatroom_users:
+                u.send(s_msg) #此项目中过来的msg里有用户信息就原样转发到浏览器了
 #
 run(w_showWebApp,host=Conf.localhost,port=Conf.localport,reloader=True,server=GeventWebSocketServer)
 #run(w_showWebApp,host=Conf.localhost,port=Conf.localport)

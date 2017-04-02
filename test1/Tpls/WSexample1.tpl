@@ -1,6 +1,7 @@
 %import Conf
 %#来自https://github.com/zeekay/bottle-websocket/edit/master/examples/chat/index.tpl的例子,进行了实验性的极小改编。本例子就是基本的传消息到ws服务器在接到服务器的原句的返回并显示。
 <!doctype html>
+<html>
 <head>
     <meta charset="utf-8" />
     <title>WebSocket Chat</title>
@@ -10,6 +11,7 @@
     </style>
 
     <script src="/Js/jquery.1.6.4.min.js"></script>
+	<script src="/Js/jquery.cookie.js"></script>
     <script>
         $(document).ready(function() {
             if (!window.WebSocket) {
@@ -25,7 +27,6 @@
                 $('#messages').append('<li>Connected to chat.</li>');
             }
             ws.onmessage = function(evt) {
-				alert ('received sth');
                 $('#messages').append('<li>' + evt.data + '</li>');
             }
 			ws.onclose = function(evt){
@@ -35,7 +36,7 @@
 				//alert ('some webscoket errors happened');
 				console.log('Error occured: ' + evt.data);
 			}
-%#            $('#send-message').click(function() {
+//            $('#send-message').click(function() {
 			$('#send').submit(function() {		
                 ws.send($('#name').val() + ": " + $('#message').val());
 				$('#messages').append('<li>I have sended '+$('#name').val() + ": " + $('#message').val()+'.</li>');
