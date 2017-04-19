@@ -1,0 +1,10 @@
+//-用于任一一个通用型game的html模板。单gamejs，名称既是路由名也是js文件名
+//-接收参数game_name
+doctype html
+html(lang="en")
+	head
+		title="9tc-"+game_name
+		script(type="text/javascript",src="/Js/phaser.2.6.2.min.js")
+	body
+		div#phaser-game
+		script(src="/Js/"+game_name+".js")

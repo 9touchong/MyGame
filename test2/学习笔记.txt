@@ -1,0 +1,5 @@
+﻿next的作用，next()是跳到当前路由的下一个回调函数，不同的函数只要路由一样都可以；但若是next('route')就会调到同路由的另一个函数,如果有的话;如果前一个函数已经send了next的后面的再send就不行了，console.log不影响。
+views目录中是模板和html文件，这里用pug(原jade)模板引擎。
+用pug时
+	res.render('index',{"title":"haha",pretty:true});	//pug文件后缀可以省略,title是自定义的一个模板中的传入,双引号不加也行，pretty代表最终浏览器的html代码自动换行，是pug的渲染设置参数保留关键字，要注意这些类似的保留关键字
+	空格不能随便塞
