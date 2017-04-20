@@ -1,6 +1,6 @@
 //
-	%import Conf
-	%#来自https://github.com/zeekay/bottle-websocket/edit/master/examples/chat/index.tpl的例子,进行了实验性的极小改编。本例子就是基本的传消息到ws服务器在接到服务器的原句的返回并显示。
+	接受Conf
+	来自https://github.com/zeekay/bottle-websocket/edit/master/examples/chat/index.tpl的例子,进行了实验性的极小改编。本例子就是基本的传消息到ws服务器在接到服务器的原句的返回并显示。
 doctype html
 html(lang="en")
 	head
@@ -19,8 +19,7 @@ html(lang="en")
 						$('#messages').append("<li>Your browser doesn't support WebSockets.</li>");
 					}
 				}
-				//ws = new WebSocket('ws://192.168.1.106:2353/websocket');
-				ws = new WebSocket('ws://{{Conf.localhost}}:{{Conf.localport}}/forWSexample1');
+				ws = new WebSocket('ws://#{Conf.localhost}:#{Conf.localport}/forWSexample1');
 				ws.onopen = function(evt) {
 					$('#messages').append('<li>Connected to chat.</li>');
 				}
@@ -34,9 +33,12 @@ html(lang="en")
 					//alert ('some webscoket errors happened');
 					console.log('Error occured: ' + evt.data);
 				}
-	//			$('#send-message').click(function() {
-				$('#send').submit(function() {		
-					ws.send($('#name').val() + ": " + $('#message').val());
+				$('#send-message').click(function() {
+					if ($('#name').val()){
+						ws.send($('#name').val() + ": " + $('#message').val());
+					}else{
+						ws.send("");
+					};
 					$('#messages').append('<li>I have sended '+$('#name').val() + ": " + $('#message').val()+'.</li>');
 					$('#message').val('').focus();
 					return false;
@@ -44,8 +46,8 @@ html(lang="en")
 			});
 	body
 		h2 WebSocket Chat Example
-		form.
-			<input id="name" type="text" value="name">
-			<input id="message" type="text" value="message" />
-			<input id="send-message" type="button" value="Send" />
+		form
+			input(id="name",type="text",value="name")
+			input(id="message",type="text",value="message")
+			input(id="send-message",type="button",value="Send")
 		div#messages

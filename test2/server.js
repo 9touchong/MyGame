@@ -1,11 +1,16 @@
+var Conf = require('./Conf')
 var express = require('express');
 var fs = require('fs');
 var app = express();
 var pug = require('pug');	//模板引擎
+var expressWs = require('express-ws')(app);	//ws
 app.set('views', './views');
 app.set('view engine', 'pug');
 app.use(express.static('./'));
 
+//几个变量
+var for_WSexample1_users = new Set()    //用于WS实例
+var for_WSchatroom_users = new Set()    //用于WS聊天室项目 存储成员的ws
 // 没有挂载路径的中间件，应用的每个请求都会执行该中间件
 app.use(function (req, res, next) {
 	console.log('Time:', Date.now(),'url',req.originalUrl,'med',req.method);
@@ -27,10 +32,25 @@ app.get('/index', function (req, res) {
 
 app.get('/:agame', function (req, res) {
 	if (fs.existsSync("./views/"+req.params.agame+".pug")){
-		res.render(req.params.agame,{pretty:true});
+		res.render(req.params.agame,{pretty:true,Conf:Conf});
 	}else{
-		res.render("normal_one_game",{"game_name":req.params.agame,pretty:true})
+		res.render("normal_one_game",{"game_name":req.params.agame,pretty:true,Conf:Conf})
 	}
+})
+
+app.ws('/forWSexample1',function(ws,req){
+	for_WSexample1_users.add(ws);
+	ws.on('message', function(msg){
+		if (msg){
+			console.log("received:",msg);
+			for_WSexample1_users.forEach(function(u){
+				u.send(msg);
+			});
+		}else{
+			console.log("received none");
+		}
+	});
+	for_WSexample1_user.delete(ws);
 })
 
 
@@ -50,7 +70,7 @@ app.get('/useru/:id', function (req, res, next) {
 	res.send('special');
 });
 
-var server = app.listen(3000,"127.0.0.1",function () {
+var server = app.listen(Conf.localport,Conf.localhost,function () {
 	var host = server.address().address;
 	var port = server.address().port;
 	console.log('9tc app listening at http://%s:%s', host, port);
