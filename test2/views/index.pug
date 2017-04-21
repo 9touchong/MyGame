@@ -5,6 +5,11 @@ html(lang="en")
 		title=title+"haha"
 		script(type="text/javascript",src="/Js/phaser.2.6.2.min.js")
 	body
+		div#User
+		-if(UserInfo)
+			h4 您好#{UserInfo['name']}<a href="/login">退出</a>
+		-else	//目前的逻辑理论上不会到这里
+			a (href="/login")登陆
 		div#phaser-game_lis
 			<a href="/test">test</a><br/>
 			<a href="/turn_rotation_test1">转向模型1</a>
