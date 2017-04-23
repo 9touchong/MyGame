@@ -23,6 +23,7 @@ function check_token(req, res, next) {
 		try{
 			var info = jwt.decode(received_token, Conf.secret_key, false, Conf.encryption_algorithm);
 		}catch(err){
+			console.log("check token cause error:",err);
 			return res.redirect('/login');
 		};
 		if (!("exp" in info) || info['exp']<Date.now()/1000){	//过期
@@ -38,7 +39,8 @@ function check_token(req, res, next) {
 app.use(function (req, res, next) {
 	console.log('Time:', Date.now(),'url',req.originalUrl,'med',req.method);
 	next();
-})
+});
+
 
 app.get('/login', function (req, res) {
 	res.clearCookie('access_token');
@@ -66,14 +68,12 @@ app.post('/dologin',urlencodedParser,function(req,res){
 	};
 })
 
-
 app.get('/', function (req, res) {
 	console.log('Hello root /!');
 	res.redirect('/index');
 });
 
-
-app.get('/index', check_token, function (req, res) {
+app.get('/index',check_token,function (req, res) {
 	res.render('index',{"title":"9touchong",pretty:true,UserInfo:req.UserInfo});
 })
 
@@ -85,7 +85,7 @@ app.get('/:agame', check_token, function (req, res) {
 	}
 })
 
-app.ws('/forWSexample1',check_token,function(ws,req){	//#此路由仅用于WS实例1
+app.ws('/forWSexample1',function(ws,req){	//#此路由仅用于WS实例1
 	for_WSexample1_users.add(ws);
 	ws.on('message', function(msg){
 		if (msg){
@@ -100,7 +100,8 @@ app.ws('/forWSexample1',check_token,function(ws,req){	//#此路由仅用于WS实
 	for_WSexample1_user.delete(ws);
 })
 
-app.ws('/forWSchatroom',check_token,function(ws,req){	//#用于聊天室项目通信
+app.use('/forWSchatroom',check_token);	//经过ws的req结构会改变所以tokencheck这一步不好放在下边
+app.ws('/forWSchatroom',function(ws,req){	//#用于聊天室项目通信
 	var temVipUsers= new Set(["0001","0003"]);	//假设这两个id有权限进入聊天室
 	if (!for_WSchatroom_users.has(ws)){	//不是已在聊天室内的ws连接
 		console.log("进入forWSchatroom");
