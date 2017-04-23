@@ -16,14 +16,15 @@ app.use(express.static('./'));
 //几个变量
 var for_WSexample1_users = new Set()    //用于WS实例
 var for_WSchatroom_users = new Set()    //用于WS聊天室项目 存储成员的ws
-// 没有挂载路径的中间件，应用的每个请求都会执行该中间件
-app.use(function (req, res, next) {
-	console.log('Time:', Date.now(),'url',req.originalUrl,'med',req.method);
-	//check token
+//自定义验证token的中间件，在需要的路由上调用
+function check_token(req, res, next) {
 	var received_token = req.cookies["access_token"];
-	console.log("test",req.cookies["access_toke"])
 	if (received_token){
-		var info = jwt.decode(received_token, Conf.secret_key, false, Conf.encryption_algorithm);
+		try{
+			var info = jwt.decode(received_token, Conf.secret_key, false, Conf.encryption_algorithm);
+		}catch(err){
+			return res.redirect('/login');
+		};
 		if (!("exp" in info) || info['exp']<Date.now()/1000){	//过期
 			res.redirect('/login');
 		};
@@ -32,7 +33,12 @@ app.use(function (req, res, next) {
 		res.redirect('/login');
 	};
 	next();
-});
+};
+// 没有挂载路径的中间件，应用的每个请求都会执行该中间件
+app.use(function (req, res, next) {
+	console.log('Time:', Date.now(),'url',req.originalUrl,'med',req.method);
+	next();
+})
 
 app.get('/login', function (req, res) {
 	res.clearCookie('access_token');
@@ -67,11 +73,11 @@ app.get('/', function (req, res) {
 });
 
 
-app.get('/index', function (req, res) {
+app.get('/index', check_token, function (req, res) {
 	res.render('index',{"title":"9touchong",pretty:true,UserInfo:req.UserInfo});
 })
 
-app.get('/:agame', function (req, res) {
+app.get('/:agame', check_token, function (req, res) {
 	if (fs.existsSync("./views/"+req.params.agame+".pug")){
 		res.render(req.params.agame,{pretty:true,Conf:Conf,UserInfo:req.UserInfo});
 	}else{
@@ -79,7 +85,7 @@ app.get('/:agame', function (req, res) {
 	}
 })
 
-app.ws('/forWSexample1',function(ws,req){	//#此路由仅用于WS实例1
+app.ws('/forWSexample1',check_token,function(ws,req){	//#此路由仅用于WS实例1
 	for_WSexample1_users.add(ws);
 	ws.on('message', function(msg){
 		if (msg){
@@ -94,11 +100,13 @@ app.ws('/forWSexample1',function(ws,req){	//#此路由仅用于WS实例1
 	for_WSexample1_user.delete(ws);
 })
 
-app.ws('/forWSchatroom',function(ws,req){	//#用于聊天室项目通信
+app.ws('/forWSchatroom',check_token,function(ws,req){	//#用于聊天室项目通信
 	var temVipUsers= new Set(["0001","0003"]);	//假设这两个id有权限进入聊天室
 	if (!for_WSchatroom_users.has(ws)){	//不是已在聊天室内的ws连接
+		console.log("进入forWSchatroom");
 		if (req.UserInfo && temVipUsers.has(req.UserInfo["id"])){//有权限的用户
 			for_WSchatroom_users.add(ws);
+			console.log("用户id",req.UserInfo["id"],"将被允许进入");
 		}else{	//用户无权限
 			//ws.send("对不起您无进入权限");
 			console.log("用户id",req.UserInfo["id"],"因无权限被禁入聊天室");

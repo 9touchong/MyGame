@@ -21,6 +21,6 @@ var Conf={
 	cookie_exp:7603200,	//cookie通常最大存活时间，秒单位,88天
 	access_token_exp:86400,	//token的生存时间，秒单位,1天.这里只有access没有fresh token
 	encryption_algorithm:"HS256",	//加密算法
-	secret_key:"*&^%doit",	//用于token加密解密的密钥，这里对称加密固一个密钥即可
+	secret_key:"*&tyi%doit",	//用于token加密解密的密钥，这里对称加密固一个密钥即可
 };
 module.exports = Conf;
