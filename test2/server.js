@@ -20,9 +20,10 @@ var for_WSchatroom_users = new Set()    //用于WS聊天室项目 存储成员�
 app.use(function (req, res, next) {
 	console.log('Time:', Date.now(),'url',req.originalUrl,'med',req.method);
 	//check token
-	var recrived_token = req.cookies["access_token"];
-	if (recrived_token){
-		var info = jwt.decode(recrived_token, Conf.secret_key, false, Conf.encryption_algorithm);
+	var received_token = req.cookies["access_token"];
+	console.log("test",req.cookies["access_toke"])
+	if (received_token){
+		var info = jwt.decode(received_token, Conf.secret_key, false, Conf.encryption_algorithm);
 		if (!("exp" in info) || info['exp']<Date.now()/1000){	//过期
 			res.redirect('/login');
 		};
@@ -33,13 +34,8 @@ app.use(function (req, res, next) {
 	next();
 });
 
-app.get('/', function (req, res) {
-	console.log('Hello root /!');
-	console.log('Hello root',req.recrived_token);
-	res.redirect('/index');
-});
-
 app.get('/login', function (req, res) {
+	res.clearCookie('access_token');
 	res.sendFile( __dirname + '/views/login.html' );
 })
 
@@ -64,19 +60,26 @@ app.post('/dologin',urlencodedParser,function(req,res){
 	};
 })
 
+
+app.get('/', function (req, res) {
+	console.log('Hello root /!');
+	res.redirect('/index');
+});
+
+
 app.get('/index', function (req, res) {
 	res.render('index',{"title":"9touchong",pretty:true,UserInfo:req.UserInfo});
 })
 
 app.get('/:agame', function (req, res) {
 	if (fs.existsSync("./views/"+req.params.agame+".pug")){
-		res.render(req.params.agame,{pretty:true,Conf:Conf});
+		res.render(req.params.agame,{pretty:true,Conf:Conf,UserInfo:req.UserInfo});
 	}else{
-		res.render("normal_one_game",{"game_name":req.params.agame,pretty:true,Conf:Conf})
+		res.render("normal_one_game",{"game_name":req.params.agame,pretty:true,Conf:Conf,UserInfo:req.UserInfo})
 	}
 })
 
-app.ws('/forWSexample1',function(ws,req){
+app.ws('/forWSexample1',function(ws,req){	//#此路由仅用于WS实例1
 	for_WSexample1_users.add(ws);
 	ws.on('message', function(msg){
 		if (msg){
@@ -86,11 +89,34 @@ app.ws('/forWSexample1',function(ws,req){
 			});
 		}else{
 			console.log("received none");
-		}
+		};
 	});
 	for_WSexample1_user.delete(ws);
 })
 
+app.ws('/forWSchatroom',function(ws,req){	//#用于聊天室项目通信
+	var temVipUsers= new Set(["0001","0003"]);	//假设这两个id有权限进入聊天室
+	if (!for_WSchatroom_users.has(ws)){	//不是已在聊天室内的ws连接
+		if (req.UserInfo && temVipUsers.has(req.UserInfo["id"])){//有权限的用户
+			for_WSchatroom_users.add(ws);
+		}else{	//用户无权限
+			//ws.send("对不起您无进入权限");
+			console.log("用户id",req.UserInfo["id"],"因无权限被禁入聊天室");
+		};
+	}
+	//下面就是合法成员正常传送消息的情况了
+	console.log("将与",req.UserInfo["id"],"通信");
+	ws.on('message', function(msg){
+		if (msg){
+			d_msg=JSON.parse(msg);
+			s_msg=JSON.stringify(d_msg);
+			msg=s_msg;	//这里象征性的处理一下，结果和接收到的一样
+			for_WSchatroom_users.forEach(function(u){
+				u.send(msg);
+			});
+		};
+	});
+});
 
 // 一个中间件栈，处理指向 /user/:id 的 GET 请求
 app.get('/user/:id', function (req, res, next) {
