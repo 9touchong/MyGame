@@ -2,12 +2,13 @@ var Conf = require('./Conf')
 var express = require('express');
 var fs = require('fs');
 var app = express();
-var pug = require('pug');	//模板引擎
+//var pug = require('pug');	//模板引擎
 var expressWs = require('express-ws')(app);	//ws
 var jwt = require('jwt-simple');	//jwt
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var urlencodedParser = bodyParser.urlencoded({ extended: false });	//用于post路由
+//var matterjs_test = require("./Js/def/server/test_matter_s")	//为试验matter-js写的模块
 app.use(cookieParser());
 app.set('views', './views');
 app.set('view engine', 'pug');
@@ -127,6 +128,10 @@ app.ws('/forWSchatroom',function(ws,req){	//#用于聊天室项目通信
 	});
 });
 
+app.ws('/for_matter-js_test',function(ws,req){	//#此路由仅用于WS实例1
+	var game = new matterjs_test();
+	game.startGO(ws);
+})
 // 一个中间件栈，处理指向 /user/:id 的 GET 请求
 app.get('/user/:id', function (req, res, next) {
 	// 如果 user id 为 0, 跳到下一个路由

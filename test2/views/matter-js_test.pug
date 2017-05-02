@@ -1,0 +1,60 @@
+//
+	接受Conf
+doctype html
+html(lang="en")
+	head
+		title="9tc-test_Matter"
+		script(type="text/javascript",src="/Js/lib/matter.min.js")
+		script(src="/Js/lib/jquery.1.6.4.min.js")
+		script(src="/Js/lib/json2.js")
+	body
+		script(type="text/javascript").
+			//物理图形初始化部分
+			// module aliases
+			var Engine = Matter.Engine,
+				Render = Matter.Render,
+				World = Matter.World,
+				Bodies = Matter.Bodies,
+				Body = Matter.Body;
+
+			// create an engine
+			var engine = Engine.create();
+
+			// create a renderer
+			var render = Render.create({
+				element: document.body,
+				engine: engine
+			});
+
+			// create two boxes and a ground
+			var boxA = Bodies.rectangle(400, 200, 80, 80);
+			var boxB = Bodies.rectangle(450, 50, 80, 80);
+			var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
+
+			// add all of the bodies to the world
+			World.add(engine.world, [boxA, boxB, ground]);
+
+			// run the engine
+			Engine.run(engine);
+
+			// run the renderer
+			Render.run(render);
+			//WS通信部分
+			//Body.setPosition(boxA,{"x":100,"y":300});
+			//alert (JSON.stringify(boxA.position));
+			if (!window.WebSocket) {
+				if (window.MozWebSocket) {
+					window.WebSocket = window.MozWebSocket;
+				} else {
+					alert ("Your browser doesn't support WebSockets");
+				}
+			};
+			ws = new WebSocket('ws://#{Conf.localhost}:#{Conf.localport}/for_matter-js_test');
+			
+			ws.onopen = function(evt) {
+				//alert ("Connected to chat.");
+			}
+			ws.onmessage = function(evt) {//规定传过来的就是两个position
+				var data=JSON.parse(evt.data);
+				Body.setPosition(boxA,data);
+			};
