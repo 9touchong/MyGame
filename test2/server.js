@@ -8,7 +8,6 @@ var jwt = require('jwt-simple');	//jwt
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var urlencodedParser = bodyParser.urlencoded({ extended: false });	//用于post路由
-//var matterjs_test = require("./Js/def/server/test_matter_s")	//为试验matter-js写的模块
 app.use(cookieParser());
 app.set('views', './views');
 app.set('view engine', 'pug');
@@ -128,8 +127,9 @@ app.ws('/forWSchatroom',function(ws,req){	//#用于聊天室项目通信
 	});
 });
 
-app.ws('/for_matter-js_test',function(ws,req){	//#此路由仅用于WS实例1
-	var game = new matterjs_test();
+app.ws('/SPhysX_game/:js',function(ws,req){	//#此WS路由用于与服务器端的带物理引擎的实时游戏进程交互，目前用的物理引擎是matter-js。此常规交互方式只需要一个在服务端的游戏js文件。
+	var serversjs= require("./Js/def/server/"+req.params.js);
+	var game = new serversjs();
 	game.startGO(ws);
 })
 // 一个中间件栈，处理指向 /user/:id 的 GET 请求
