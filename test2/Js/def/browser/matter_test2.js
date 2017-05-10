@@ -76,18 +76,19 @@ World.add(world, [
     Bodies.rectangle(0, 300, 50, 600, { isStatic: true })
 ]);
 // create and init boxes
-var boxA = Bodies.rectangle(400, 200, 40, 40);
-var boxB = Bodies.rectangle(400, 50, 80, 80);
-Object.assign(boxA,base_act,base_pro);
+var Boxes = {};	//装box的容器
+Boxes["boxA"] = Bodies.rectangle(400, 200, 40, 40);
+Boxes.boxB = Bodies.rectangle(400, 50, 80, 80);
+Object.assign(Boxes.boxA,base_act,base_pro);
 
 // add boxes
-World.add(world, [boxA,boxB]);
+World.add(world, [Boxes["boxA"],Boxes["boxB"]]);
 
 // fit the render viewport to the scene
-Render.lookAt(render, {
-	min: { x: 0, y: 0},
-	max: { x: 800, y: 600 }
-});
+//Render.lookAt(render, {
+//	min: { x: 0, y: 0},
+//	max: { x: 600, y: 500 },
+//});
 
 //自定义键盘控制
 $(this).keydown(function(event){
@@ -96,16 +97,16 @@ $(this).keydown(function(event){
 			runner.enabled?runner.enabled=false:runner.enabled=true;
 			break;
 		case (65):	//A
-			boxA.turn_L();
+			Boxes.boxA.turn_L();
 			break;
 		case (68):	//D
-			boxA.turn_R();
+			Boxes.boxA.turn_R();
 			break;
 		case (87):	//W
-			boxA.e_Go();
+			Boxes.boxA.e_Go();
 			break;
 		case (83):	//S
-			boxA.e_B_down();
+			Boxes.boxA.e_B_down();
 			break;
 		default:
 			alert ("您按了无效按键");
@@ -114,7 +115,7 @@ $(this).keydown(function(event){
 $(this).keyup(function(event){
 	switch (event.which){
 		case (83):	//S
-			boxA.e_B_up();
+			Boxes.boxA.e_B_up();
 			break;
 	};
 });

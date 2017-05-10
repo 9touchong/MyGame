@@ -32,9 +32,15 @@ function the_interface(){
 	this.startGO = function(the_ws){
 		//索求的参数ws是一个websocket连接
 		//the_ws.send(JSON.stringify(boxA.position));
-		setInterval(function() {
+		var the_runner = setInterval(function() {
 			Engine.update(engine, 1000 / 60);
-			the_ws.send(JSON.stringify(boxA.position));
+			try{
+				the_ws.send(JSON.stringify(boxA.position));
+			}catch(e){
+				console.log("haha");
+				the_ws.close();
+				clearInterval(the_runner);
+			};
 		}, 1000 / 60);
 	};
 }
