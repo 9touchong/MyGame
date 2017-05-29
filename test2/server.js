@@ -78,7 +78,9 @@ app.get('/index',check_token,function (req, res) {
 })
 
 app.get('/:agame', check_token, function (req, res) {
-	if (fs.existsSync("./views/"+req.params.agame+".pug")){
+	if (fs.existsSync("./views/"+req.params.agame+".html")){
+		res.sendFile( __dirname + '/views/'+req.params.agame+".html");
+	}else if (fs.existsSync("./views/"+req.params.agame+".pug")){
 		res.render(req.params.agame,{pretty:true,Conf:Conf,UserInfo:req.UserInfo});
 	}else{
 		res.render("normal_one_game",{"game_name":req.params.agame,pretty:true,Conf:Conf,UserInfo:req.UserInfo})
