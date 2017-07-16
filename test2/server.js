@@ -146,7 +146,7 @@ app.get('/user/:id', function (req, res, next) {
 });
 
 // 处理 /user/:id， 渲染一个特殊页面
-app.get('/useru/:id', function (req, res, next) {
+app.get('/user/:id', function (req, res, next) {
 	res.send('special');
 });
 
